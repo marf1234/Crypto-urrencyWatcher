@@ -1,0 +1,9 @@
+com\vegera\maper\CryptoCurrencyMapper.class
+com\vegera\service\CryptoCurrencyService.class
+com\vegera\dto\CryptoCurrencyDto.class
+com\vegera\model\CryptoCurrency.class
+com\vegera\repisitory\CryptoCurrencyRepository.class
+com\vegera\service\CryptoCurrencyServiceImpl.class
+com\vegera\controller\CryptoCurrencyController.class
+com\vegera\requsetmapping\Mapping.class
+com\vegera\cryptocyrrencywatcher\CryptocurrencyWatcherApplication.class
