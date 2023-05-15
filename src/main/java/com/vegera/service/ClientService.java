@@ -21,24 +21,31 @@ public class ClientService {
     private final CryptoCurrencyRepository cryptoCurrencyRepository;
 
     public void save(ClientNotifyRequest clientNotifyRequest) {
+        String symbol = clientNotifyRequest.getSymbol();
+        String username = clientNotifyRequest.getUsername();
 
-        CryptoCurrency currency = cryptoCurrencyRepository.findBySymbol(clientNotifyRequest.getSymbol())
-                .orElseThrow(() -> new CurrencyNotFoundException(String.format("Currency %s not found", clientNotifyRequest.getSymbol())));
+        CryptoCurrency currency = cryptoCurrencyRepository.findBySymbol(symbol)
+                .orElseThrow(() -> new CurrencyNotFoundException(String.format("Currency %s not found", symbol)));
 
-        Optional<Client> clientOpt = clientRepository.findByUsernameAndSymbol(clientNotifyRequest.getUsername(), clientNotifyRequest.getSymbol());
+        clientRepository.findByUsernameAndSymbol(username, symbol)
+                .ifPresentOrElse(
+                        client -> updateClient(client, currency),
+                        () -> createClient(username, currency)
+                );
+    }
 
-        Client client;
+    private void updateClient(Client client, CryptoCurrency currency) {
+        client.setSymbol(currency.getSymbol());
+        client.setPrice(currency.getPriceUsd());
+    }
 
-        if (clientOpt.isPresent()) {
-            clientOpt.get().setSymbol(currency.getSymbol());
-            clientOpt.get().setPrice(currency.getPriceUsd());
-        } else {
-            client = Client.builder()
-                    .username(clientNotifyRequest.getUsername())
-                    .price(currency.getPriceUsd())
-                    .symbol(currency.getSymbol())
-                    .build();
-            clientRepository.save(client);
-        }
+    private void createClient(String username, CryptoCurrency currency) {
+        Client client = Client.builder()
+                .username(username)
+                .symbol(currency.getSymbol())
+                .price(currency.getPriceUsd())
+                .build();
+        clientRepository.save(client);
     }
 }
+

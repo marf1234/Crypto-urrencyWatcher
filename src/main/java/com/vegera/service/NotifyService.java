@@ -6,6 +6,8 @@ import com.vegera.repository.ClientRepository;
 import com.vegera.repository.CryptoCurrencyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -16,8 +18,6 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.Double.parseDouble;
-import static java.math.BigDecimal.valueOf;
 
 @Service
 @RequiredArgsConstructor
@@ -32,48 +32,51 @@ public class NotifyService {
 
     private final CryptoCurrencyRepository cryptoCurrencyRepository;
     private final ClientRepository clientRepository;
+    private final RestTemplate restTemplate;
 
     @Scheduled(fixedDelay = 60000L)
     public void updateCurrencies() {
-
-        CryptoCurrency BTC = updateInfoFromServer(ACTUAL_INFO_BTC);
-        CryptoCurrency ETH = updateInfoFromServer(ACTUAL_INFO_ETH);
-        CryptoCurrency SOL = updateInfoFromServer(ACTUAL_INFO_SOL);
+        CryptoCurrency btc = updateInfoFromServer(ACTUAL_INFO_BTC);
+        CryptoCurrency eth = updateInfoFromServer(ACTUAL_INFO_ETH);
+        CryptoCurrency sol = updateInfoFromServer(ACTUAL_INFO_SOL);
 
         List<Client> clients = clientRepository.findAll();
-        for (Client clientInfo : clients) {
-            loggingInfo(BTC, clientInfo);
-            loggingInfo(ETH, clientInfo);
-            loggingInfo(SOL, clientInfo);
+        for (Client client : clients) {
+            loggingInfo(btc, client);
+            loggingInfo(eth, client);
+            loggingInfo(sol, client);
         }
     }
 
-    private void loggingInfo(CryptoCurrency cryptoCurrency, Client clientInfo) {
-        if (clientInfo.getSymbol().equals(cryptoCurrency.getSymbol())) {
-            BigDecimal changePrice = changePrice(clientInfo.getPrice(), cryptoCurrency.getPriceUsd());
-            if (changePrice.abs().doubleValue() > MAX_CHANGE.doubleValue()) {
-                log.warn(String.format("Currency: %s, username: %s, change of price: %.3f percent", cryptoCurrency.getSymbol(), clientInfo.getUsername(), changePrice));
+    private void loggingInfo(CryptoCurrency cryptoCurrency, Client client) {
+        if (client.getSymbol().equals(cryptoCurrency.getSymbol())) {
+            BigDecimal changePrice = calculatePriceChange(client.getPrice(), cryptoCurrency.getPriceUsd());
+            if (changePrice.abs().compareTo(MAX_CHANGE) > 0) {
+                log.warn("Currency: {}, username: {}, change of price: {} percent", cryptoCurrency.getSymbol(), client.getUsername(), changePrice);
             }
         }
     }
 
     private CryptoCurrency updateInfoFromServer(String url) {
-        ResponseEntity<List> response = new RestTemplate().getForEntity(url, List.class);
-        List body = response.getBody();
-        Map<String, Object> data = (Map<String, Object>) body.get(0);
-        String id = (String) data.get("id");
-        String symbol = (String) data.get("symbol");
-        String price = (String) data.get("price_usd");
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Map<String, Object>>>() {
+        });
+        List<Map<String, Object>> body = response.getBody();
+        Map<String, Object> data = body.get(0);
+        String id = String.valueOf(data.get("id"));
+        String symbol = String.valueOf(data.get("symbol"));
+        String price = String.valueOf(data.get("price_usd"));
 
         CryptoCurrency cryptoCurrency = CryptoCurrency.builder()
                 .id(Long.valueOf(id))
                 .symbol(symbol)
-                .priceUsd(valueOf(parseDouble(price)))
+                .priceUsd(new BigDecimal(price))
                 .build();
         return cryptoCurrencyRepository.save(cryptoCurrency);
     }
 
-    private BigDecimal changePrice(BigDecimal oldPrice, BigDecimal actualPrice) {
-        return (actualPrice.subtract(oldPrice).divide(oldPrice, 5, RoundingMode.CEILING)).multiply(CONVERT_TO_PERCENT);
+    private BigDecimal calculatePriceChange(BigDecimal oldPrice, BigDecimal currentPrice) {
+        BigDecimal priceChange = currentPrice.subtract(oldPrice).divide(oldPrice, 5, RoundingMode.CEILING);
+        return priceChange.multiply(CONVERT_TO_PERCENT);
     }
 }
+

@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
@@ -23,9 +23,10 @@ public class CryptoCurrencyService {
     private final CryptoMapperToDto cryptoMapperToDto;
 
     public List<CryptoCurrencyDto> getAll() {
-        return cryptoCurrencyRepository.findAll().stream()
+        List<CryptoCurrency> cryptoCurrencies = cryptoCurrencyRepository.findAll();
+        return cryptoCurrencies.stream()
                 .map(cryptoMapperToDto::mapFrom)
-                .collect(toList());
+                .collect(Collectors.toList());
     }
 
     public CryptoCurrency getCurrency(String symbol) {
@@ -33,3 +34,4 @@ public class CryptoCurrencyService {
                 .orElseThrow(() -> new CurrencyNotFoundException(String.format("Currency %s not found", symbol)));
     }
 }
+

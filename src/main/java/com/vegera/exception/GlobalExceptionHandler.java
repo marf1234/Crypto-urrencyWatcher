@@ -10,17 +10,24 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> handleException(CurrencyNotFoundException exception) {
-        log.warn("During handling a request was caught exception: {}", exception.getMessage());
+    @ExceptionHandler(CurrencyNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCurrencyNotFoundException(CurrencyNotFoundException exception) {
+        log.warn("Caught exception during request handling: {}", exception.getMessage());
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(exception.getMessage())
                 .status(HttpStatus.NOT_FOUND.value())
                 .build();
-        return createResponseEntity(errorResponse);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
-    private ResponseEntity<ErrorResponse> createResponseEntity(ErrorResponse errorResponse) {
-        return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(errorResponse.getStatus()));
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception exception) {
+        log.error("Caught exception during request handling: {}", exception.getMessage(), exception);
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message("Internal server error")
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .build();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 }
+

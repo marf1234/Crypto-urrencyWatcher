@@ -8,20 +8,22 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.math.BigDecimal;
 
+@Entity
+@Table(name = "crypto_currency")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 @Builder
-@Table(name = "crypto_currency")
 public class CryptoCurrency {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @Column(name = "symbol")
     private String symbol;
 
     @Column(name = "price_usd")
     private BigDecimal priceUsd;
 }
+

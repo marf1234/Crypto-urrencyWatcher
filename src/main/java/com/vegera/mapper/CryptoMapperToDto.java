@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CryptoMapperToDto implements Mapper<CryptoCurrency, CryptoCurrencyDto> {
-    @Override
+
     public CryptoCurrencyDto mapFrom(CryptoCurrency entity) {
         return CryptoCurrencyDto.builder()
-                .id(entity.getId().toString())
+                .id(String.valueOf(entity.getId()))
                 .symbol(entity.getSymbol())
-                .priceUsd(entity.getPriceUsd().toString())
+                .priceUsd(String.valueOf(entity.getPriceUsd()))
                 .build();
     }
 }

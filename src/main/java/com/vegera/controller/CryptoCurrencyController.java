@@ -12,26 +12,25 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/crypto")
+@RequiredArgsConstructor
 public class CryptoCurrencyController {
 
     private final CryptoCurrencyService cryptoCurrencyService;
     private final ClientService clientService;
 
-
     @GetMapping("/all")
-    public List<CryptoCurrencyDto> getAll() {
+    public List<CryptoCurrencyDto> getAllCryptoCurrencies() {
         return cryptoCurrencyService.getAll();
     }
 
     @GetMapping("/{symbol}")
-    public CryptoCurrency getCurrency(@PathVariable String symbol) {
+    public CryptoCurrency getCryptoCurrency(@PathVariable String symbol) {
         return cryptoCurrencyService.getCurrency(symbol);
     }
 
     @PostMapping("/notify")
-    public void saveClientInfo(ClientNotifyRequest clientNotifyRequest) {
+    public void saveClientInfo(@RequestBody ClientNotifyRequest clientNotifyRequest) {
         clientService.save(clientNotifyRequest);
     }
 }
