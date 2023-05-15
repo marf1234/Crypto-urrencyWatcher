@@ -1,4 +1,4 @@
-package com.vegera.cryptocyrrencywatcher;
+package com.vegera;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,12 +1,17 @@
 package com.vegera.dto;
-import lombok.Data;
 
-import java.math.BigDecimal;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
-@Data
+@Value
+@Builder
 public class CryptoCurrencyDto {
 
-    private Long id;
-    private String symbol;
-    private BigDecimal priceUSD;
+    String id;
+
+    String symbol;
+
+    @JsonProperty("price_usd")
+    String priceUsd;
+
 }

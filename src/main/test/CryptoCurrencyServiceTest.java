@@ -1,6 +1,4 @@
-package java.com.vegera.controller;
-
-import com.vegera.cryptocyrrencywatcher.CryptocurrencyWatcherApplication;
+import com.vegera.CryptocurrencyWatcherApplication;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
