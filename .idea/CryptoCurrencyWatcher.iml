@@ -15,7 +15,7 @@
         <setting name="validation-enabled" value="true" />
         <setting name="provider-name" value="Hibernate" />
         <datasource-mapping>
-          <factory-entry name="CryptoCurrencyWatcher" />
+          <factory-entry name="CryptoCurrencyWatcher" value="49419bc0-3752-4155-a0f2-0201f90d36c8" />
           <factory-entry name="entityManagerFactory" />
         </datasource-mapping>
         <naming-strategy-map />

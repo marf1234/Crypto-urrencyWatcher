@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Map;
 
 
+/**
+ * Service for notifying users about cryptocurrency price changes.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -34,6 +37,9 @@ public class NotifyService {
     private final ClientRepository clientRepository;
     private final RestTemplate restTemplate;
 
+    /**
+     * Updates the cryptocurrencies' prices at regular intervals and notifies users if there is a significant price change.
+     */
     @Scheduled(fixedDelay = 60000L)
     public void updateCurrencies() {
         CryptoCurrency btc = updateInfoFromServer(ACTUAL_INFO_BTC);
@@ -48,6 +54,12 @@ public class NotifyService {
         }
     }
 
+    /**
+     * Logs the price change information for a specific cryptocurrency and client.
+     *
+     * @param cryptoCurrency The cryptocurrency object.
+     * @param client         The client object.
+     */
     private void loggingInfo(CryptoCurrency cryptoCurrency, Client client) {
         if (client.getSymbol().equals(cryptoCurrency.getSymbol())) {
             BigDecimal changePrice = calculatePriceChange(client.getPrice(), cryptoCurrency.getPriceUsd());
@@ -57,6 +69,12 @@ public class NotifyService {
         }
     }
 
+    /**
+     * Updates the information of a cryptocurrency from the server.
+     *
+     * @param url The URL to fetch the information from.
+     * @return The updated cryptocurrency object.
+     */
     private CryptoCurrency updateInfoFromServer(String url) {
         ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Map<String, Object>>>() {
         });
@@ -74,9 +92,17 @@ public class NotifyService {
         return cryptoCurrencyRepository.save(cryptoCurrency);
     }
 
+    /**
+     * Calculates the percentage change between two prices.
+     *
+     * @param oldPrice     The old price.
+     * @param currentPrice The current price.
+     * @return The percentage change.
+     */
     private BigDecimal calculatePriceChange(BigDecimal oldPrice, BigDecimal currentPrice) {
         BigDecimal priceChange = currentPrice.subtract(oldPrice).divide(oldPrice, 5, RoundingMode.CEILING);
         return priceChange.multiply(CONVERT_TO_PERCENT);
     }
 }
+
 

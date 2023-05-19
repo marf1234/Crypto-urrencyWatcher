@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
+/**
+ * Service for managing cryptocurrency data.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -22,6 +25,11 @@ public class CryptoCurrencyService {
     private final CryptoCurrencyRepository cryptoCurrencyRepository;
     private final CryptoMapperToDto cryptoMapperToDto;
 
+    /**
+     * Retrieves a list of all cryptocurrencies.
+     *
+     * @return The list of cryptocurrency DTOs.
+     */
     public List<CryptoCurrencyDto> getAll() {
         List<CryptoCurrency> cryptoCurrencies = cryptoCurrencyRepository.findAll();
         return cryptoCurrencies.stream()
@@ -29,9 +37,17 @@ public class CryptoCurrencyService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves a specific cryptocurrency based on its symbol.
+     *
+     * @param symbol The symbol of the cryptocurrency.
+     * @return The cryptocurrency object.
+     * @throws CurrencyNotFoundException if the cryptocurrency is not found.
+     */
     public CryptoCurrency getCurrency(String symbol) {
         return cryptoCurrencyRepository.findBySymbol(symbol)
                 .orElseThrow(() -> new CurrencyNotFoundException(String.format("Currency %s not found", symbol)));
     }
 }
+
 

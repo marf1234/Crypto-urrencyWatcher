@@ -12,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+/**
+ * Service for managing clients and their notifications.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -20,6 +23,12 @@ public class ClientService {
     private final ClientRepository clientRepository;
     private final CryptoCurrencyRepository cryptoCurrencyRepository;
 
+    /**
+     * Saves a client's notification request.
+     *
+     * @param clientNotifyRequest The client's notification request.
+     * @throws CurrencyNotFoundException if the requested currency is not found.
+     */
     public void save(ClientNotifyRequest clientNotifyRequest) {
         String symbol = clientNotifyRequest.getSymbol();
         String username = clientNotifyRequest.getUsername();
@@ -35,11 +44,23 @@ public class ClientService {
     }
 
     private void updateClient(Client client, CryptoCurrency currency) {
+        /**
+         * Updates an existing client with the latest currency information.
+         *
+         * @param client   The client to update.
+         * @param currency The updated currency information.
+         */
         client.setSymbol(currency.getSymbol());
         client.setPrice(currency.getPriceUsd());
     }
 
     private void createClient(String username, CryptoCurrency currency) {
+        /**
+         * Creates a new client with the specified username and currency information.
+         *
+         * @param username The username of the new client.
+         * @param currency The currency information.
+         */
         Client client = Client.builder()
                 .username(username)
                 .symbol(currency.getSymbol())
@@ -48,4 +69,5 @@ public class ClientService {
         clientRepository.save(client);
     }
 }
+
 
